@@ -124,9 +124,11 @@ async function generate() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "오류 발생");
 
+    const textarea = document.getElementById("result-text");
+    textarea.value = data.result;
+    updateCharCount();
     document.getElementById("result-meta").textContent =
-      `${patientName} · ${selectedPlatform} ${selectedPostType} · ${data.result.length}자`;
-    document.getElementById("result-text").value = data.result;
+      `${patientName} · ${selectedPlatform} ${selectedPostType}`;
     resultCard.style.display = "flex";
     resultCard.scrollIntoView({ behavior: "smooth" });
   } catch (e) {
@@ -145,6 +147,13 @@ function copyText() {
     setTimeout(() => toast.classList.add("hidden"), 2000);
   });
 }
+
+function updateCharCount() {
+  const len = document.getElementById("result-text").value.length;
+  document.getElementById("char-count").textContent = `${len}자`;
+}
+
+document.getElementById("result-text").addEventListener("input", updateCharCount);
 
 loadConfig();
 loadPatients();

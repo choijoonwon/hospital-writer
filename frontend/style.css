@@ -238,17 +238,35 @@ select:focus, input[type="text"]:focus {
   line-height: 1.7;
   color: #1a1a2e;
   resize: vertical;
-  background: #fafafa;
+  background: #fff;
   font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.result-textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #aaa;
+  font-weight: 500;
 }
 
 .toast {
-  text-align: center;
   font-size: 13px;
   font-weight: 600;
   color: #2d7a3a;
   background: #e6f4ea;
-  padding: 8px;
+  padding: 6px 14px;
   border-radius: 8px;
   transition: opacity 0.3s;
 }
