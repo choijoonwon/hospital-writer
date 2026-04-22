@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>병원 마케팅 글쓰기 자동화</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>병원 마케팅 글쓰기 자동화</h1>
+      <div id="status-badge" class="badge badge-loading">로딩 중...</div>
+    </header>
+
+    <div class="card">
+      <h2>1. 환자 선택</h2>
+      <div class="row">
+        <div class="field">
+          <label for="patient-select">환자</label>
+          <select id="patient-select">
+            <option value="">-- 환자를 선택하세요 --</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" onclick="loadPatients()">새로고침</button>
+      </div>
+
+      <div id="patient-info" class="patient-info hidden">
+        <h3>환자 정보 요약</h3>
+        <div id="patient-details" class="details-grid"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. 글 설정</h2>
+      <div class="row gap-lg">
+        <div class="field">
+          <label>플랫폼</label>
+          <div id="platform-buttons" class="btn-group">
+            <button class="toggle-btn" data-value="여우야" onclick="selectPlatform(this)">여우야</button>
+            <button class="toggle-btn" data-value="성예사" onclick="selectPlatform(this)">성예사</button>
+            <button class="toggle-btn" data-value="바비" onclick="selectPlatform(this)">바비</button>
+            <button class="toggle-btn" data-value="강남언니" onclick="selectPlatform(this)">강남언니</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>글 종류</label>
+          <div id="type-buttons" class="btn-group">
+            <button class="toggle-btn" data-value="게시글" onclick="selectPostType(this)">게시글</button>
+            <button class="toggle-btn" data-value="댓글" onclick="selectPostType(this)">댓글</button>
+            <button class="toggle-btn" data-value="쪽지" onclick="selectPostType(this)">쪽지</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="extra-context">추가 요청사항 (선택)</label>
+        <input type="text" id="extra-context" placeholder="예: 회복 기간 위주로 써줘, 자연스럽게 병원 이름 한 번만 언급" />
+      </div>
+
+      <button class="btn btn-primary" onclick="generate()" id="generate-btn">
+        글 생성하기
+      </button>
+    </div>
+
+    <div class="card" id="result-card" style="display:none;">
+      <div class="result-header">
+        <h2>3. 생성된 글 초안</h2>
+        <div class="result-actions">
+          <button class="btn btn-secondary" onclick="generate()">재생성</button>
+          <button class="btn btn-copy" onclick="copyText()">복사하기</button>
+        </div>
+      </div>
+      <div id="result-meta" class="result-meta"></div>
+      <textarea id="result-text" class="result-textarea" readonly></textarea>
+      <div id="copy-toast" class="toast hidden">클립보드에 복사됐습니다!</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
