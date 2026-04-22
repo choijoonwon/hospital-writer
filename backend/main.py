@@ -25,9 +25,28 @@ def list_patients():
     try:
         from backend.sheets import get_patients
         patients = get_patients()
-        return {"patients": [{"이름": p["이름"], "수술부위": p.get("수술부위", ""), "수술날": p.get("수술날", "")} for p in patients]}
+        return {"patients": [
+            {
+                "이름": p["이름"],
+                "병원명": p.get("병원명", ""),
+                "수술부위": p.get("수술부위", ""),
+                "수술날": p.get("수술날", ""),
+            }
+            for p in patients
+        ]}
     except FileNotFoundError:
-        raise HTTPException(status_code=503, detail="credentials.json 파일이 없습니다. Google Cloud 서비스 계정 설정을 확인하세요.")
+        raise HTTPException(status_code=503, detail="credentials.json 파일이 없습니다.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/hospitals")
+def list_hospitals():
+    try:
+        from backend.sheets import get_patients
+        patients = get_patients()
+        hospitals = sorted({p.get("병원명", "") for p in patients if p.get("병원명")})
+        return {"hospitals": hospitals}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
