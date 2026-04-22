@@ -1,9 +1,61 @@
 import os
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# ── 샘플 데이터 (credentials.json 없을 때 데모용) ──────────────────────
+MOCK_PATIENTS = [
+    {
+        "이름": "김민지",
+        "닉네임_메모": "",
+        "병원알아본날": "11/18",
+        "상담날": "12/19",
+        "병원방문날": "1/18",
+        "수술날": "2/18",
+        "수술부위": "윤곽 3종",
+        "수술금액": "1,350만원",
+        "담당원장": "임종우",
+        "연령대말투": "30대 초반",
+        "선호키워드": "의견반영,안전,사후관리",
+        "말투스타일": "~여 말투",
+        "계정시작일": "23년도",
+        "마지막게시일": "4월 25일",
+        "활동카페": "여우야,성위키,가아사",
+        "여우야닉네임": "싸루매",
+        "성예사닉네임": "생각을하자",
+        "바비닉네임": "저릿저릿",
+        "강남언니닉네임": "민지2302",
+        "기타닉네임": "",
+        "게시이력병원": "A병원,B병원",
+        "언급금지사항": "C병원 쌍수·눈교 언급 금지",
+        "특이사항": "C병원에서 쌍수·눈교 받은 이력 있음",
+    },
+    {
+        "이름": "박수연",
+        "닉네임_메모": "",
+        "병원알아본날": "9/5",
+        "상담날": "10/12",
+        "병원방문날": "11/1",
+        "수술날": "11/15",
+        "수술부위": "코 재수술",
+        "수술금액": "780만원",
+        "담당원장": "박지훈",
+        "연령대말투": "20대 후반",
+        "선호키워드": "자연스러움,회복빠름",
+        "말투스타일": "~죠 ~어요 말투",
+        "계정시작일": "22년도",
+        "마지막게시일": "3월 10일",
+        "활동카페": "여우야,성예사",
+        "여우야닉네임": "수연이코",
+        "성예사닉네임": "박수연_뷰",
+        "바비닉네임": "",
+        "강남언니닉네임": "suyn_nose",
+        "기타닉네임": "",
+        "게시이력병원": "B병원",
+        "언급금지사항": "",
+        "특이사항": "",
+    },
+]
 
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID", "")
@@ -44,7 +96,14 @@ PLATFORM_NICKNAME_MAP = {
 }
 
 
+def _use_mock() -> bool:
+    """credentials.json 없거나 SPREADSHEET_ID 미설정이면 샘플 데이터 사용"""
+    return not os.path.exists(CREDENTIALS_PATH) or not SPREADSHEET_ID
+
+
 def _get_service():
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
     creds = service_account.Credentials.from_service_account_file(
         CREDENTIALS_PATH, scopes=SCOPES
     )
@@ -52,6 +111,8 @@ def _get_service():
 
 
 def get_patients(sheet_name: str = "Sheet1") -> list[dict]:
+    if _use_mock():
+        return MOCK_PATIENTS
     service = _get_service()
     result = (
         service.spreadsheets()
