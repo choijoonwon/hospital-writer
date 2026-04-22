@@ -53,12 +53,9 @@
       <h2>2. 글 설정</h2>
       <div class="row gap-lg">
         <div class="field">
-          <label>플랫폼</label>
+          <label>플랫폼 <span id="platform-hint" class="label-hint">환자를 먼저 선택하세요</span></label>
           <div id="platform-buttons" class="btn-group">
-            <button class="toggle-btn" data-value="여우야" onclick="selectPlatform(this)">여우야</button>
-            <button class="toggle-btn" data-value="성예사" onclick="selectPlatform(this)">성예사</button>
-            <button class="toggle-btn" data-value="바비" onclick="selectPlatform(this)">바비</button>
-            <button class="toggle-btn" data-value="강남언니" onclick="selectPlatform(this)">강남언니</button>
+            <span class="platform-empty-msg">← 환자 선택 시 카페 목록이 여기에 표시됩니다</span>
           </div>
         </div>
         <div class="field">

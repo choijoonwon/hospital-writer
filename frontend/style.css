@@ -160,6 +160,19 @@ select:focus, input[type="text"]:focus {
   color: #fff;
 }
 
+.label-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #aaa;
+  margin-left: 6px;
+}
+
+.platform-empty-msg {
+  font-size: 12px;
+  color: #bbb;
+  padding: 6px 0;
+}
+
 /* ── 검색 ── */
 .search-row {
   display: flex;
@@ -301,6 +314,37 @@ select:focus, input[type="text"]:focus {
   padding: 0;
 }
 .btn-text:hover { color: #555; }
+
+/* ── 카페 목록 ── */
+.cafe-list { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+
+.cafe-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cafe-name {
+  font-weight: 700;
+  color: #6c63ff;
+  min-width: 60px;
+}
+
+.cafe-nick { color: #444; }
+
+.cafe-last {
+  font-size: 11px;
+  color: #aaa;
+  margin-left: auto;
+}
+
+/* 플랫폼 버튼 안 닉네임 */
+.platform-nick {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.8;
+}
 
 .details-grid {
   display: grid;

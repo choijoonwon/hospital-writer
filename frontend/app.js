@@ -132,21 +132,16 @@ function clearPatient() {
 }
 
 function renderPatientInfo(p) {
+  // 1) 환자 정보 그리드
   const grid = document.getElementById("patient-details");
   const fields = [
-    ["병원", p["병원명"]],
-    ["수술 부위", p["수술부위"]],
-    ["수술 날짜", p["수술날"]],
-    ["수술 금액", p["수술금액"]],
-    ["담당 원장", p["담당원장"] ? p["담당원장"] + " 원장님" : ""],
-    ["말투 스타일", [p["연령대말투"], p["말투스타일"]].filter(Boolean).join(", ")],
-    ["선호 키워드", p["선호키워드"]],
-    ["활동 카페", p["활동카페"]],
-    ["여우야 닉네임", p["여우야닉네임"]],
-    ["성예사 닉네임", p["성예사닉네임"]],
-    ["바비 닉네임", p["바비닉네임"]],
-    ["강남언니 닉네임", p["강남언니닉네임"]],
-    ["게시 이력 병원", p["게시이력병원"]],
+    ["병원",      p["병원명"]],
+    ["수술",      [p["수술날"], p["수술부위"]].filter(Boolean).join(" · ")],
+    ["담당 원장", p["원장님"] ? p["원장님"] + " 원장님" : ""],
+    ["말투/성향", p["말투"]],
+    ["게시글 방향", p["게시글성향"]],
+    ["언급 병원",  p["리스트"]],
+    ["년생",      p["년생"] ? p["년생"] + "년생" : ""],
   ];
 
   grid.innerHTML = fields
@@ -158,12 +153,46 @@ function renderPatientInfo(p) {
       </div>`)
     .join("");
 
-  if (p["언급금지사항"]) {
+  // 카페 목록 표시
+  if (p["카페목록"]?.length) {
+    const cafeHtml = p["카페목록"].map(c => `
+      <div class="cafe-row">
+        <span class="cafe-name">${c["카페"]}</span>
+        <span class="cafe-nick">${c["닉네임"] || "-"}</span>
+        ${c["마지막게시글"] ? `<span class="cafe-last">${c["마지막게시글"]}</span>` : ""}
+      </div>`).join("");
+    grid.innerHTML += `
+      <div class="detail-item cafe-block" style="grid-column:1/-1">
+        <span class="detail-label">카페 / 닉네임</span>
+        <div class="cafe-list">${cafeHtml}</div>
+      </div>`;
+  }
+
+  if (p["특이사항"]) {
     grid.innerHTML += `
       <div class="detail-item" style="grid-column:1/-1">
-        <span class="detail-label">언급 금지</span>
-        <span class="detail-value warn">🚫 ${p["언급금지사항"]}</span>
+        <span class="detail-label">주의사항</span>
+        <span class="detail-value warn">🚫 ${p["특이사항"]}</span>
       </div>`;
+  }
+
+  // 2) 플랫폼 버튼을 환자의 카페 목록으로 동적 렌더링
+  const platformWrap = document.getElementById("platform-buttons");
+  const hint = document.getElementById("platform-hint");
+  selectedPlatform = "";
+
+  if (p["카페목록"]?.length) {
+    hint.textContent = "";
+    platformWrap.innerHTML = p["카페목록"]
+      .filter(c => c["카페"])
+      .map(c => `
+        <button class="toggle-btn" data-value="${c['카페']}" onclick="selectPlatform(this)">
+          ${c["카페"]}<span class="platform-nick">${c["닉네임"] ? " · " + c["닉네임"] : ""}</span>
+        </button>`)
+      .join("");
+  } else {
+    hint.textContent = "카페 정보 없음";
+    platformWrap.innerHTML = '<span class="platform-empty-msg">카페 정보가 없습니다</span>';
   }
 }
 
