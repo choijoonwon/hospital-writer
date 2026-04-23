@@ -1,0 +1,563 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+  background: #f5f6fa;
+  color: #1a1a2e;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-weight: 600;
+}
+.badge-loading { background: #e8e8f0; color: #666; }
+.badge-ok { background: #e6f4ea; color: #2d7a3a; }
+.badge-warn { background: #fff8e1; color: #b45309; }
+.badge-error { background: #fdecea; color: #c62828; }
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #444;
+}
+
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gap-lg { gap: 24px; }
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 24px;
+}
+
+.settings-platform {
+  grid-column: span 2;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 160px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+select, input[type="text"], input[type="number"] {
+  padding: 10px 14px;
+  border: 1.5px solid #e0e0ea;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #fafafa;
+  color: #1a1a2e;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+select:focus, input[type="text"]:focus, input[type="number"]:focus {
+  border-color: #6c63ff;
+  background: #fff;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: #6c63ff;
+  color: #fff;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+.btn-primary:hover { background: #574fd6; }
+.btn-primary:disabled { background: #b0aee8; cursor: not-allowed; }
+
+.btn-secondary {
+  background: #f0f0f8;
+  color: #555;
+}
+.btn-secondary:hover { background: #e4e4f0; }
+
+.btn-copy {
+  background: #2d7a3a;
+  color: #fff;
+}
+.btn-copy:hover { background: #256031; }
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toggle-btn {
+  padding: 8px 16px;
+  border: 2px solid #e0e0ea;
+  border-radius: 99px;
+  background: #fff;
+  color: #555;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.toggle-btn:hover { border-color: #6c63ff; color: #6c63ff; }
+.toggle-btn.active {
+  background: #6c63ff;
+  border-color: #6c63ff;
+  color: #fff;
+}
+
+.label-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #aaa;
+  margin-left: 6px;
+}
+
+.platform-empty-msg {
+  font-size: 12px;
+  color: #bbb;
+  padding: 6px 0;
+}
+
+/* ── 환자 선택 레이아웃 (좌: 검색, 우: 리스트) ── */
+.patient-select-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.search-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.btn-refresh {
+  width: 100%;
+}
+
+/* ── 검색 ── */
+.search-wrap {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.search-wrap input[type="text"] {
+  width: 100%;
+  padding: 10px 32px 10px 34px;
+}
+
+.search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaa;
+  font-size: 13px;
+  padding: 2px 4px;
+}
+.search-clear:hover { color: #555; }
+
+/* ── 환자 목록 ── */
+.patient-list {
+  flex: 1;
+  height: 224px;
+  overflow-y: auto;
+  border: 1.5px solid #e8e8f5;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.patient-list::-webkit-scrollbar { width: 6px; }
+.patient-list::-webkit-scrollbar-track { background: transparent; }
+.patient-list::-webkit-scrollbar-thumb { background: #d0d0e0; border-radius: 99px; }
+
+.patient-list-empty {
+  padding: 32px;
+  text-align: center;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.patient-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f8;
+  transition: background 0.12s;
+}
+
+.patient-item:last-child { border-bottom: none; }
+.patient-item:hover { background: #f0f0fd; }
+.patient-item.selected { background: #eeecff; }
+.patient-item.disabled-account { opacity: 0.45; cursor: not-allowed; }
+.patient-item.disabled-account:hover { background: transparent; }
+
+.tag-disabled {
+  font-size: 10px;
+  font-weight: 700;
+  color: #c62828;
+  background: #fdecea;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.patient-item-left { display: flex; flex-direction: column; gap: 3px; }
+
+.patient-item-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.patient-item-sub {
+  font-size: 12px;
+  color: #888;
+}
+
+.patient-item-hospital {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6c63ff;
+  background: #f0eeff;
+  padding: 2px 8px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
+/* ── 환자 정보 ── */
+.patient-info {
+  background: #f8f8fd;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1.5px solid #e8e8f5;
+}
+
+.patient-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.patient-info h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-text:hover { color: #555; }
+
+/* ── 카페 목록 ── */
+.cafe-list { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+
+.cafe-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cafe-name {
+  font-weight: 700;
+  color: #6c63ff;
+  min-width: 60px;
+}
+
+.cafe-nick { color: #444; }
+
+.cafe-last {
+  font-size: 11px;
+  color: #aaa;
+  margin-left: auto;
+}
+
+/* 플랫폼 버튼 안 닉네임 */
+.platform-nick {
+  font-size: 11px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: #1a1a2e;
+  font-weight: 500;
+}
+
+.detail-value.warn {
+  color: #c62828;
+  background: #fdecea;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.result-meta {
+  font-size: 13px;
+  color: #888;
+  background: #f5f6fa;
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+
+.result-textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 16px;
+  border: 1.5px solid #e0e0ea;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #1a1a2e;
+  resize: vertical;
+  background: #fff;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.result-textarea:focus {
+  outline: none;
+  border-color: #6c63ff;
+}
+
+.result-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.toast {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d7a3a;
+  background: #e6f4ea;
+  padding: 6px 14px;
+  border-radius: 8px;
+  transition: opacity 0.3s;
+}
+
+.hidden { display: none !important; }
+
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 검수 결과 패널 ── */
+.review-panel {
+  border-top: 1.5px solid #e8e8f5;
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+}
+
+.review-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+.review-badge-pass { background: #e6f4ea; color: #2d7a3a; }
+.review-badge-warn { background: #fff8e1; color: #b45309; }
+.review-badge-fail { background: #fdecea; color: #c62828; }
+
+.review-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.review-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.review-item-pass { background: #f4faf5; }
+.review-item-warn { background: #fffbf0; }
+.review-item-fail { background: #fff5f5; }
+
+.review-icon {
+  font-size: 12px;
+  font-weight: 700;
+  width: 16px;
+  flex-shrink: 0;
+}
+.review-item-pass .review-icon { color: #2d7a3a; }
+.review-item-warn .review-icon { color: #b45309; }
+.review-item-fail .review-icon { color: #c62828; }
+
+.review-item-name {
+  font-weight: 700;
+  color: #444;
+  white-space: nowrap;
+  min-width: 90px;
+}
+
+.review-item-comment {
+  color: #666;
+  line-height: 1.5;
+}
+
+.review-summary {
+  font-size: 12px;
+  color: #888;
+  padding: 8px 10px;
+  background: #f5f6fa;
+  border-radius: 8px;
+  line-height: 1.6;
+}
