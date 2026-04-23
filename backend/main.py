@@ -1,9 +1,12 @@
 import os
+import io
 from pathlib import Path
+from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from pydantic import BaseModel
+from typing import List, Optional
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).parent.parent
@@ -111,6 +114,117 @@ def refresh_patients():
         return {"count": len(patients), "message": "새로고침 완료"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class ExportItem(BaseModel):
+    name: str
+    hospital: str = ""
+    platform: str = ""
+    post_type: str = ""
+    text: str
+    char_count: int = 0
+    review_pass: Optional[str] = None   # "pass" | "warn" | "fail" | None
+
+
+class ExportRequest(BaseModel):
+    items: List[ExportItem]
+    filename: str = "생성결과"
+
+
+@app.post("/api/export-docx")
+def export_docx(req: ExportRequest):
+    try:
+        from docx import Document
+        from docx.shared import Pt, RGBColor, Cm
+        from docx.oxml.ns import qn
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+        doc = Document()
+
+        # 여백 설정
+        for section in doc.sections:
+            section.top_margin = Cm(2.5)
+            section.bottom_margin = Cm(2.5)
+            section.left_margin = Cm(3)
+            section.right_margin = Cm(3)
+
+        # 제목
+        today = datetime.now().strftime("%Y-%m-%d")
+        title_para = doc.add_paragraph()
+        title_run = title_para.add_run(f"병원 마케팅 글쓰기 생성 결과")
+        title_run.bold = True
+        title_run.font.size = Pt(18)
+        title_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        date_para = doc.add_paragraph()
+        date_run = date_para.add_run(f"생성일: {today}  |  총 {len(req.items)}건")
+        date_run.font.size = Pt(10)
+        date_run.font.color.rgb = RGBColor(0x88, 0x88, 0x88)
+        date_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        doc.add_paragraph()  # 공백
+
+        REVIEW_LABEL = {"pass": "✓ 통과", "warn": "△ 주의", "fail": "✗ 수정필요"}
+        REVIEW_COLOR = {
+            "pass": RGBColor(0x2d, 0x7a, 0x3a),
+            "warn": RGBColor(0xb4, 0x53, 0x09),
+            "fail": RGBColor(0xc6, 0x28, 0x28),
+        }
+
+        for i, item in enumerate(req.items):
+            # 구분선
+            if i > 0:
+                doc.add_paragraph("─" * 50)
+
+            # 헤더 (이름 + 병원 + 플랫폼)
+            header_para = doc.add_paragraph()
+            name_run = header_para.add_run(f"{item.name}")
+            name_run.bold = True
+            name_run.font.size = Pt(13)
+
+            if item.hospital:
+                hosp_run = header_para.add_run(f"  |  {item.hospital}")
+                hosp_run.font.size = Pt(11)
+                hosp_run.font.color.rgb = RGBColor(0x44, 0x44, 0x88)
+
+            if item.platform:
+                plat_run = header_para.add_run(f"  ·  {item.platform}")
+                plat_run.font.size = Pt(10)
+                plat_run.font.color.rgb = RGBColor(0x99, 0x99, 0x99)
+
+            # 검수 결과 + 글자수
+            meta_para = doc.add_paragraph()
+            cnt_run = meta_para.add_run(f"{item.char_count}자")
+            cnt_run.font.size = Pt(9)
+            cnt_run.font.color.rgb = RGBColor(0xaa, 0xaa, 0xaa)
+
+            if item.review_pass and item.review_pass in REVIEW_LABEL:
+                rev_run = meta_para.add_run(f"  {REVIEW_LABEL[item.review_pass]}")
+                rev_run.bold = True
+                rev_run.font.size = Pt(9)
+                rev_run.font.color.rgb = REVIEW_COLOR[item.review_pass]
+
+            # 본문
+            body_para = doc.add_paragraph()
+            body_run = body_para.add_run(item.text)
+            body_run.font.size = Pt(11)
+
+            doc.add_paragraph()  # 여백
+
+        buf = io.BytesIO()
+        doc.save(buf)
+        buf.seek(0)
+
+        from urllib.parse import quote
+        safe_filename = quote(req.filename.encode("utf-8"))
+
+        return StreamingResponse(
+            buf,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename*=UTF-8''{safe_filename}.docx"},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DOCX 생성 오류: {e}")
 
 
 @app.get("/api/config")

@@ -229,10 +229,29 @@
           <div id="bulk-progress-bar" class="bulk-progress-bar"></div>
         </div>
         <div id="bulk-results-list" class="bulk-results-list"></div>
+
+        <!-- 완료 후 내보내기 액션 -->
+        <div id="bulk-export-actions" class="bulk-export-actions hidden">
+          <button class="btn btn-secondary" onclick="openBulkPreview()">🔍 전체 미리보기</button>
+          <button id="bulk-copy-all-btn" class="btn btn-copy" onclick="copyAllBulkResults()">전체 복사</button>
+          <button id="bulk-html-btn" class="btn btn-secondary" onclick="downloadBulkHtml()">⬇ HTML 저장</button>
+        </div>
       </div>
 
     </div><!-- /section-bulk -->
 
+  </div>
+
+  <!-- 미리보기 모달 -->
+  <div id="bulk-preview-modal" class="preview-modal hidden">
+    <div class="preview-modal-backdrop" onclick="closeBulkPreview()"></div>
+    <div class="preview-modal-content">
+      <div class="preview-modal-header">
+        <h2 class="preview-modal-title">전체 미리보기</h2>
+        <button class="preview-modal-close" onclick="closeBulkPreview()">✕</button>
+      </div>
+      <div id="bulk-preview-body" class="preview-modal-body"></div>
+    </div>
   </div>
 
   <script src="app.js"></script>

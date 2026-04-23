@@ -13,6 +13,7 @@ let bulkSelectedPatients = [];
 let bulkPostType = "";
 let bulkHospitalFormat = "full";
 let bulkPeriodOption = "yes";
+let bulkResults = []; // 생성된 결과 저장
 
 // ── 모드 전환 ──────────────────────────────────────────────
 function switchMode(mode) {
@@ -108,7 +109,9 @@ function renderPatientList(patients) {
         <span class="patient-item-name">${p["이름"]}${p["사용불가"] ? ' <span class="tag-disabled">사용 불가</span>' : ""}</span>
         <span class="patient-item-sub">${p["수술부위"] || "수술부위 미입력"} · ${p["수술날"] || "-"}</span>
       </div>
-      ${p["병원명"] ? `<span class="patient-item-hospital">${p["병원명"]}</span>` : ""}
+      <div class="patient-item-right">
+        ${p["병원명"] ? `<span class="patient-item-hospital">${p["병원명"]}</span>` : ""}
+      </div>
     </div>
   `).join("");
 }
@@ -322,9 +325,11 @@ function renderBulkPatientList(patients) {
           <span class="patient-item-name">${p["이름"]}${isDisabled ? ' <span class="tag-disabled">사용 불가</span>' : ""}</span>
           <span class="patient-item-sub">${p["수술부위"] || "수술부위 미입력"} · ${p["수술날"] || "-"}</span>
         </div>
-        ${p["병원명"] ? `<span class="patient-item-hospital">${p["병원명"]}</span>` : ""}
-        ${!isDisabled ? `<input type="checkbox" class="patient-item-checkbox" ${isChecked ? "checked" : ""}
-          onclick="event.stopPropagation(); toggleBulkPatient('${p["이름"].replace(/'/g, "\\'")}')" />` : ""}
+        <div class="patient-item-right">
+          ${p["병원명"] ? `<span class="patient-item-hospital">${p["병원명"]}</span>` : ""}
+          ${!isDisabled ? `<input type="checkbox" class="patient-item-checkbox" ${isChecked ? "checked" : ""}
+            onclick="event.stopPropagation(); toggleBulkPatient('${p["이름"].replace(/'/g, "\\'")}')" />` : ""}
+        </div>
       </div>`;
   }).join("");
 }
@@ -419,9 +424,12 @@ async function generateBulk() {
   const progressBarWrap = document.getElementById("bulk-progress-bar-wrap");
   const progressBar = document.getElementById("bulk-progress-bar");
 
+  bulkResults = [];
   resultCard.classList.remove("hidden");
   resultsList.innerHTML = "";
   progressBarWrap.classList.remove("hidden");
+  // 액션 버튼 숨김
+  document.getElementById("bulk-export-actions").classList.add("hidden");
   resultCard.scrollIntoView({ behavior: "smooth" });
 
   const total = bulkSelectedPatients.length;
@@ -490,6 +498,11 @@ async function generateBulk() {
   progressBar.style.width = "100%";
   setTimeout(() => progressBarWrap.classList.add("hidden"), 1500);
 
+  // 완료 후 내보내기 버튼 표시
+  if (bulkResults.length > 0) {
+    document.getElementById("bulk-export-actions").classList.remove("hidden");
+  }
+
   btn.disabled = false;
   btn.innerHTML = "대량 생성하기";
 }
@@ -497,6 +510,17 @@ async function generateBulk() {
 function renderBulkResultItem(el, patient, platform, data) {
   const ICON = { pass: "✓", warn: "△", fail: "✗" };
   const review = data.review;
+
+  // 결과 저장
+  bulkResults.push({
+    name: patient["이름"],
+    hospital: patient["병원명"] || "",
+    platform: platform || "",
+    post_type: bulkPostType,
+    text: data.result,
+    char_count: data.result.length,
+    review_pass: (review && !review.error) ? (review.종합 || null) : null,
+  });
   const reviewBadgeHtml = (review && !review.error)
     ? `<span class="review-badge review-badge-${review.종합}" style="font-size:10px;padding:2px 8px">${{pass:"통과",warn:"주의",fail:"수정 필요"}[review.종합]||""}</span>`
     : "";
@@ -544,10 +568,134 @@ function toggleBulkItem(header) {
 }
 
 function copyBulkText(uid) {
-  const text = document.getElementById(uid).value;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector(`#${uid} ~ .bulk-result-actions .btn-copy`);
+  const el = document.getElementById(uid);
+  if (!el) return;
+  navigator.clipboard.writeText(el.value).then(() => {
+    const actions = el.closest(".bulk-result-body")?.querySelector(".bulk-result-actions");
+    if (!actions) return;
+    const old = actions.querySelector(".bulk-copy-toast");
+    if (old) old.remove();
+    const toast = document.createElement("span");
+    toast.className = "bulk-copy-toast";
+    toast.textContent = "복사됨!";
+    actions.appendChild(toast);
+    setTimeout(() => toast.remove(), 1800);
   });
+}
+
+// ── 대량 내보내기 ──────────────────────────────────────────
+function copyAllBulkResults() {
+  if (bulkResults.length === 0) return;
+
+  const text = bulkResults.map((item, i) =>
+    `[${i + 1}] ${item.name} | ${item.hospital}${item.platform ? " | " + item.platform : ""}\n${item.text}`
+  ).join("\n\n─────────────────────\n\n");
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById("bulk-copy-all-btn");
+    const orig = btn.textContent;
+    btn.textContent = "복사됨!";
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+  });
+}
+
+function downloadBulkHtml() {
+  if (bulkResults.length === 0) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const REVIEW_LABEL = { pass: "✓ 통과", warn: "△ 주의", fail: "✗ 수정필요" };
+  const REVIEW_COLOR = { pass: "#2d7a3a", warn: "#b45309", fail: "#c62828" };
+
+  const itemsHtml = bulkResults.map((item, i) => {
+    const reviewHtml = item.review_pass
+      ? `<span style="color:${REVIEW_COLOR[item.review_pass]};font-weight:700;font-size:12px">${REVIEW_LABEL[item.review_pass] || ""}</span>`
+      : "";
+    const escaped = item.text
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/\n/g, "<br>");
+    return `
+    <div class="item">
+      <div class="item-header">
+        <span class="num">${i + 1}</span>
+        <strong>${item.name}</strong>
+        <span class="meta">${item.hospital}${item.platform ? " · " + item.platform : ""}</span>
+        ${reviewHtml}
+        <span class="charcount">${item.char_count}자</span>
+      </div>
+      <div class="item-text">${escaped}</div>
+    </div>`;
+  }).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>생성결과_${today}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; max-width: 820px; margin: 40px auto; padding: 0 24px; color: #222; background: #fff; }
+  h1 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 6px; color: #1a1a2e; }
+  .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 32px; }
+  .item { border: 1.5px solid #dde; border-radius: 12px; margin-bottom: 22px; overflow: hidden; page-break-inside: avoid; }
+  .item-header { background: #f5f5fb; padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid #eee; }
+  .num { background: #6c63ff; color: #fff; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  strong { font-size: 14px; color: #1a1a2e; }
+  .meta { color: #888; font-size: 12px; flex: 1; }
+  .charcount { color: #bbb; font-size: 11px; margin-left: auto; }
+  .item-text { padding: 16px 18px; font-size: 13.5px; line-height: 1.85; color: #333; }
+  @media print {
+    body { margin: 20px; }
+    .item { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<h1>병원 마케팅 글쓰기 생성 결과</h1>
+<p class="subtitle">생성일: ${today}&nbsp;&nbsp;|&nbsp;&nbsp;총 ${bulkResults.length}건</p>
+${itemsHtml}
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `생성결과_${today}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function openBulkPreview() {
+  const modal = document.getElementById("bulk-preview-modal");
+  const body = document.getElementById("bulk-preview-body");
+
+  body.innerHTML = bulkResults.map((item, i) => {
+    const REVIEW_CLASS = { pass: "preview-review-pass", warn: "preview-review-warn", fail: "preview-review-fail" };
+    const REVIEW_LABEL = { pass: "✓ 통과", warn: "△ 주의", fail: "✗ 수정필요" };
+    const reviewHtml = item.review_pass
+      ? `<span class="preview-review-badge ${REVIEW_CLASS[item.review_pass] || ""}">${REVIEW_LABEL[item.review_pass] || ""}</span>`
+      : "";
+    return `
+      <div class="preview-item">
+        <div class="preview-item-header">
+          <span class="preview-item-num">${i + 1}</span>
+          <span class="preview-item-name">${item.name}</span>
+          <span class="preview-item-meta">${item.hospital}${item.platform ? " · " + item.platform : ""}</span>
+          ${reviewHtml}
+          <span class="preview-item-charcount">${item.char_count}자</span>
+        </div>
+        <div class="preview-item-text">${item.text.replace(/\n/g, "<br>")}</div>
+      </div>`;
+  }).join("");
+
+  modal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeBulkPreview() {
+  document.getElementById("bulk-preview-modal").classList.add("hidden");
+  document.body.style.overflow = "";
 }
 
 // ── 시작 ───────────────────────────────────────────────────

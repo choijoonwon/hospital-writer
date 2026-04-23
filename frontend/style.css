@@ -44,6 +44,13 @@ header h1 {
 .badge-warn { background: #fff8e1; color: #b45309; }
 .badge-error { background: #fdecea; color: #c62828; }
 
+#section-individual,
+#section-bulk {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .card {
   background: #fff;
   border-radius: 16px;
@@ -182,20 +189,27 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
 /* ── 환자 선택 레이아웃 (좌: 검색, 우: 리스트) ── */
 .patient-select-layout {
   display: flex;
-  gap: 16px;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .search-panel {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 220px;
-  flex-shrink: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  align-items: flex-end;
+}
+
+.search-panel .field {
+  flex: 1;
+  min-width: 160px;
 }
 
 .btn-refresh {
-  width: 100%;
+  width: auto;
+  flex-shrink: 0;
 }
 
 /* ── 검색 ── */
@@ -233,8 +247,8 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
 
 /* ── 환자 목록 ── */
 .patient-list {
-  flex: 1;
-  height: 224px;
+  width: 100%;
+  height: 280px;
   overflow-y: auto;
   border: 1.5px solid #e8e8f5;
   border-radius: 12px;
@@ -255,7 +269,7 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
 .patient-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   padding: 12px 16px;
   cursor: pointer;
   border-bottom: 1px solid #f0f0f8;
@@ -279,7 +293,7 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
   vertical-align: middle;
 }
 
-.patient-item-left { display: flex; flex-direction: column; gap: 3px; }
+.patient-item-left { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
 
 .patient-item-name {
   font-size: 14px;
@@ -290,6 +304,13 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
 .patient-item-sub {
   font-size: 12px;
   color: #888;
+}
+
+.patient-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .patient-item-hospital {
@@ -592,6 +613,8 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
 .bulk-select-btns {
   display: flex;
   gap: 8px;
+  align-self: flex-end;
+  flex-shrink: 0;
 }
 
 .bulk-platform-note {
@@ -762,4 +785,158 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
   padding: 20px;
   color: #aaa;
   font-size: 13px;
+}
+
+/* 복사 토스트 (bulk) */
+.bulk-copy-toast {
+  font-size: 12px;
+  color: #2d7a3a;
+  font-weight: 600;
+  animation: fadeInOut 1.8s ease forwards;
+}
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── 내보내기 액션 버튼 ── */
+.bulk-export-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1.5px solid #f0f0f8;
+}
+
+/* ── 전체 미리보기 모달 ── */
+.preview-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.preview-modal.hidden { display: none; }
+
+.preview-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.preview-modal-content {
+  position: relative;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  width: min(860px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1.5px solid #f0f0f8;
+  flex-shrink: 0;
+}
+
+.preview-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.preview-modal-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.preview-modal-close:hover { background: #f0f0f8; color: #555; }
+
+.preview-modal-body {
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 미리보기 개별 아이템 */
+.preview-item {
+  border: 1.5px solid #e8e8f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.preview-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f8f8fd;
+  flex-wrap: wrap;
+}
+
+.preview-item-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #6c63ff;
+  border-radius: 99px;
+  min-width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.preview-item-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.preview-item-meta {
+  font-size: 12px;
+  color: #888;
+  flex: 1;
+}
+
+.preview-item-charcount {
+  font-size: 11px;
+  color: #bbb;
+  margin-left: auto;
+}
+
+.preview-review-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+.preview-review-pass { background: #e6f4ea; color: #2d7a3a; }
+.preview-review-warn { background: #fff8e1; color: #b45309; }
+.preview-review-fail { background: #fdecea; color: #c62828; }
+
+.preview-item-text {
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: #333;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
