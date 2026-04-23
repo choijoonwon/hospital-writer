@@ -83,7 +83,7 @@ def _detect_gender(patient: dict) -> str | None:
     return None
 
 
-def build_system_prompt(patient: dict, platform: str, post_type: str, include_price: bool = True, hospital_format: str = "full", use_period: bool = True) -> str:
+def build_system_prompt(patient: dict, platform: str, post_type: str, hospital_format: str = "full", use_period: bool = True) -> str:
     # 해당 플랫폼의 닉네임 찾기
     cafe_info = next(
         (c for c in patient.get("카페목록", []) if c["카페"] == platform),
@@ -201,7 +201,7 @@ def build_system_prompt(patient: dict, platform: str, post_type: str, include_pr
         "- 과도한 광고 표현이나 홍보성 문구 배제",
         "- 실제 경험을 진솔하게 나누는 느낌으로",
         "- 글 첫 문장에 '안녕하세요', '안녕', '반갑습니다' 등 인사말로 시작하지 말 것. 바로 본론으로 시작할 것.",
-        f"- 가격 언급: {'수술 금액을 글에 자연스럽게 포함해도 됨' if include_price else '수술 금액·가격 정보는 절대 글에 포함하지 말 것'}",
+        "- 가격 언급: 수술 금액·가격 정보는 절대 글에 포함하지 말 것.",
         f"- 병원명 표기: {'병원 이름을 풀네임으로 표기할 것 (예: 스웨이성형외과)' if hospital_format == 'full' else '병원 이름을 초성으로만 표기할 것 (예: ㅅㅇ, ㅇㅍㅅ). 절대 풀네임 사용 금지'}",
         f"- 온점(.) 사용: {'문장 끝에 온점(.)을 자연스럽게 사용해도 됨' if use_period else '문장 끝에 온점(.)을 절대 사용하지 말 것. 마침표 없이 끝낼 것'}",
         "- 글 초안만 출력하고 설명이나 부연은 붙이지 말 것",

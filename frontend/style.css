@@ -71,12 +71,8 @@ header h1 {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px 24px;
-}
-
-.settings-platform {
-  grid-column: span 2;
 }
 
 .field {
@@ -560,4 +556,210 @@ select:focus, input[type="text"]:focus, input[type="number"]:focus {
   background: #f5f6fa;
   border-radius: 8px;
   line-height: 1.6;
+}
+
+/* ── 모드 탭 ── */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  width: fit-content;
+}
+
+.mode-tab {
+  padding: 8px 32px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  background: transparent;
+  color: #aaa;
+  transition: all 0.18s;
+}
+
+.mode-tab.active {
+  background: #6c63ff;
+  color: #fff;
+}
+
+.mode-tab:hover:not(.active) { background: #f0f0f8; color: #555; }
+
+/* ── 대량 모드 ── */
+.bulk-select-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.bulk-platform-note {
+  font-size: 12px;
+  color: #aaa;
+  margin-top: -8px;
+}
+
+/* 선택된 계정 패널 */
+.bulk-selected-panel {
+  margin-top: 16px;
+  border-top: 1.5px solid #e8e8f5;
+  padding-top: 14px;
+}
+
+.bulk-selected-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.bulk-selected-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #555;
+}
+
+.bulk-selected-count {
+  font-size: 12px;
+  font-weight: 700;
+  background: #6c63ff;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.bulk-selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.bulk-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #eeecff;
+  border: 1.5px solid #c8c3ff;
+  border-radius: 99px;
+  padding: 4px 10px 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a42cc;
+}
+
+.bulk-chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9990e8;
+  font-size: 13px;
+  padding: 0;
+  line-height: 1;
+}
+.bulk-chip-remove:hover { color: #c62828; }
+
+/* 체크박스 있는 환자 아이템 */
+.patient-item-checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: #6c63ff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* 진행 바 */
+.bulk-progress-text {
+  font-size: 13px;
+  color: #888;
+  font-weight: 500;
+}
+
+.bulk-progress-bar-wrap {
+  height: 6px;
+  background: #e8e8f5;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.bulk-progress-bar {
+  height: 100%;
+  background: #6c63ff;
+  border-radius: 99px;
+  width: 0%;
+  transition: width 0.3s;
+}
+
+/* 대량 결과 */
+.bulk-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bulk-result-item {
+  border: 1.5px solid #e8e8f5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bulk-result-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fafafa;
+  cursor: pointer;
+  user-select: none;
+}
+
+.bulk-result-header:hover { background: #f0f0fd; }
+
+.bulk-result-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a2e;
+  flex: 1;
+}
+
+.bulk-result-platform {
+  font-size: 11px;
+  background: #f0eeff;
+  color: #6c63ff;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.bulk-result-toggle {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.bulk-result-body {
+  padding: 14px 16px;
+  border-top: 1px solid #f0f0f8;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bulk-result-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.bulk-result-item.generating .bulk-result-header {
+  background: #fafafa;
+}
+
+.bulk-spinner-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  color: #aaa;
+  font-size: 13px;
 }

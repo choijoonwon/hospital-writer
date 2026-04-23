@@ -21,7 +21,6 @@ class GenerateRequest(BaseModel):
     post_type: str
     extra_context: str = ""
     char_limit: int = 0
-    include_price: bool = True
     hospital_format: str = "full"
     use_period: bool = True  # False면 문장 끝 온점 사용 안 함
 
@@ -97,7 +96,7 @@ def generate(req: GenerateRequest):
 
     try:
         from backend.generator import generate_post, review_post
-        text = generate_post(patient, req.platform, req.post_type, req.extra_context, req.char_limit, req.include_price, req.hospital_format, req.use_period)
+        text = generate_post(patient, req.platform, req.post_type, req.extra_context, req.char_limit, req.hospital_format, req.use_period)
         review = review_post(text, patient, req.platform, req.post_type)
         return {"result": text, "review": review}
     except Exception as e:

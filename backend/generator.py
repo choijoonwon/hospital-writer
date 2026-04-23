@@ -8,8 +8,8 @@ load_dotenv()
 AI_PROVIDER = os.getenv("AI_PROVIDER", "claude").lower()
 
 
-def generate_post(patient: dict, platform: str, post_type: str, extra_context: str = "", char_limit: int = 0, include_price: bool = True, hospital_format: str = "full", use_period: bool = True) -> str:
-    system_prompt = build_system_prompt(patient, platform, post_type, include_price, hospital_format, use_period)
+def generate_post(patient: dict, platform: str, post_type: str, extra_context: str = "", char_limit: int = 0, hospital_format: str = "full", use_period: bool = True) -> str:
+    system_prompt = build_system_prompt(patient, platform, post_type, hospital_format, use_period)
     user_message = build_user_message(platform, post_type, extra_context, char_limit)
 
     if AI_PROVIDER == "openai":

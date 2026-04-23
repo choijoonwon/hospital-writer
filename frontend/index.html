@@ -13,130 +13,226 @@
       <div id="status-badge" class="badge badge-loading">로딩 중...</div>
     </header>
 
-    <div class="card">
-      <h2>1. 환자 선택</h2>
+    <!-- 모드 탭 -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-individual" onclick="switchMode('individual')">개별</button>
+      <button class="mode-tab" id="tab-bulk" onclick="switchMode('bulk')">대량</button>
+    </div>
 
-      <div class="patient-select-layout">
-        <!-- 왼쪽: 검색 영역 -->
-        <div class="search-panel">
+    <!-- ══════════════════════════════════════════
+         개별 모드
+    ══════════════════════════════════════════ -->
+    <div id="section-individual">
+
+      <div class="card">
+        <h2>1. 환자 선택</h2>
+        <div class="patient-select-layout">
+          <div class="search-panel">
+            <div class="field">
+              <label>병원 검색</label>
+              <div class="search-wrap">
+                <span class="search-icon">🏥</span>
+                <input type="text" id="hospital-search" placeholder="병원명 검색..." oninput="filterPatients()" autocomplete="off" />
+                <button class="search-clear hidden" id="hospital-clear" onclick="clearHospitalSearch()">✕</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>키워드 검색</label>
+              <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="patient-search" placeholder="이름, 수술, 원장, 닉네임..." oninput="filterPatients()" autocomplete="off" />
+                <button class="search-clear hidden" id="search-clear" onclick="clearSearch()">✕</button>
+              </div>
+            </div>
+            <button id="refresh-btn" class="btn btn-secondary btn-refresh" onclick="loadPatients(true)">↺ 새로고침</button>
+          </div>
+          <div id="patient-list" class="patient-list">
+            <div class="patient-list-empty">로딩 중...</div>
+          </div>
+        </div>
+
+        <div id="patient-info" class="patient-info hidden">
+          <div class="patient-info-header">
+            <h3>환자 정보 요약</h3>
+            <button class="btn-text" onclick="clearPatient()">선택 해제</button>
+          </div>
+          <div id="patient-details" class="details-grid"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. 글 설정</h2>
+        <div class="settings-grid">
           <div class="field">
-            <label>병원 검색</label>
-            <div class="search-wrap">
-              <span class="search-icon">🏥</span>
-              <input type="text" id="hospital-search" placeholder="병원명 검색..." oninput="filterPatients()" autocomplete="off" />
-              <button class="search-clear hidden" id="hospital-clear" onclick="clearHospitalSearch()">✕</button>
+            <label>플랫폼 <span id="platform-hint" class="label-hint">환자를 먼저 선택하세요</span></label>
+            <div id="platform-buttons" class="btn-group">
+              <span class="platform-empty-msg">← 환자 선택 시 카페 목록이 여기에 표시됩니다</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>글 종류</label>
+            <div id="type-buttons" class="btn-group">
+              <button class="toggle-btn" data-value="게시글" onclick="selectPostType(this)">게시글</button>
+              <button class="toggle-btn" data-value="댓글" onclick="selectPostType(this)">댓글</button>
+              <button class="toggle-btn" data-value="쪽지" onclick="selectPostType(this)">쪽지</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>병원명 표기</label>
+            <div class="btn-group">
+              <button class="toggle-btn active" id="hospital-full" data-value="full" onclick="selectHospitalFormat(this)">풀네임</button>
+              <button class="toggle-btn" id="hospital-abbr" data-value="abbr" onclick="selectHospitalFormat(this)">초성</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>온점 사용</label>
+            <div class="btn-group">
+              <button class="toggle-btn active" id="period-yes" data-value="yes" onclick="selectPeriod(this)">사용</button>
+              <button class="toggle-btn" id="period-no" data-value="no" onclick="selectPeriod(this)">미사용</button>
+            </div>
+          </div>
+        </div>
+        <div class="row gap-lg">
+          <div class="field">
+            <label for="extra-context">추가 요청사항 (선택)</label>
+            <input type="text" id="extra-context" placeholder="예: 회복 기간 위주로 써줘, 자연스럽게 병원 이름 한 번만 언급" />
+          </div>
+          <div class="field" style="max-width:140px;">
+            <label for="char-limit">글자수 지정 (선택)</label>
+            <input type="number" id="char-limit" placeholder="예: 300" min="50" max="2000" step="50" />
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="generate()" id="generate-btn">글 생성하기</button>
+      </div>
+
+      <div class="card" id="result-card" style="display:none;">
+        <div class="result-header">
+          <h2>3. 생성된 글 초안</h2>
+          <div class="result-actions">
+            <button class="btn btn-secondary" onclick="generate()">재생성</button>
+            <button class="btn btn-copy" onclick="copyText()">복사하기</button>
+          </div>
+        </div>
+        <div id="result-meta" class="result-meta"></div>
+        <textarea id="result-text" class="result-textarea" placeholder="글이 여기에 표시됩니다. 직접 수정도 가능합니다."></textarea>
+        <div class="result-footer">
+          <span id="char-count" class="char-count">0자</span>
+          <div id="copy-toast" class="toast hidden">클립보드에 복사됐습니다!</div>
+        </div>
+        <div id="review-panel" class="review-panel hidden">
+          <div class="review-header">
+            <span class="review-title">AI 검수 결과</span>
+            <span id="review-badge" class="review-badge"></span>
+          </div>
+          <div id="review-items" class="review-items"></div>
+          <div id="review-summary" class="review-summary"></div>
+        </div>
+      </div>
+
+    </div><!-- /section-individual -->
+
+
+    <!-- ══════════════════════════════════════════
+         대량 모드
+    ══════════════════════════════════════════ -->
+    <div id="section-bulk" class="hidden">
+
+      <div class="card">
+        <h2>1. 계정 선택</h2>
+        <div class="patient-select-layout">
+          <!-- 검색 패널 -->
+          <div class="search-panel">
+            <div class="field">
+              <label>병원 검색</label>
+              <div class="search-wrap">
+                <span class="search-icon">🏥</span>
+                <input type="text" id="bulk-hospital-search" placeholder="병원명 검색..." oninput="filterBulkPatients()" autocomplete="off" />
+                <button class="search-clear hidden" id="bulk-hospital-clear" onclick="clearBulkHospitalSearch()">✕</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>키워드 검색</label>
+              <div class="search-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="bulk-patient-search" placeholder="이름, 수술, 원장, 닉네임..." oninput="filterBulkPatients()" autocomplete="off" />
+                <button class="search-clear hidden" id="bulk-search-clear" onclick="clearBulkSearch()">✕</button>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-refresh" onclick="loadPatients(true)">↺ 새로고침</button>
+            <div class="bulk-select-btns">
+              <button class="btn btn-secondary" onclick="bulkSelectAll()">전체 선택</button>
+              <button class="btn btn-secondary" onclick="bulkClearAll()">전체 해제</button>
             </div>
           </div>
 
+          <!-- 체크박스 환자 리스트 -->
+          <div id="bulk-patient-list" class="patient-list">
+            <div class="patient-list-empty">로딩 중...</div>
+          </div>
+        </div>
+
+        <!-- 선택된 계정 -->
+        <div id="bulk-selected-panel" class="bulk-selected-panel hidden">
+          <div class="bulk-selected-header">
+            <span class="bulk-selected-title">선택된 계정</span>
+            <span id="bulk-selected-count" class="bulk-selected-count">0명</span>
+            <button class="btn-text" onclick="bulkClearAll()">전체 해제</button>
+          </div>
+          <div id="bulk-selected-list" class="bulk-selected-list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2. 글 설정</h2>
+        <p class="bulk-platform-note">플랫폼은 각 계정의 첫 번째 카페로 자동 설정됩니다.</p>
+        <div class="settings-grid">
           <div class="field">
-            <label>키워드 검색</label>
-            <div class="search-wrap">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="patient-search" placeholder="이름, 수술, 원장, 닉네임..." oninput="filterPatients()" autocomplete="off" />
-              <button class="search-clear hidden" id="search-clear" onclick="clearSearch()">✕</button>
+            <label>글 종류</label>
+            <div id="bulk-type-buttons" class="btn-group">
+              <button class="toggle-btn" data-value="게시글" onclick="selectBulkPostType(this)">게시글</button>
+              <button class="toggle-btn" data-value="댓글" onclick="selectBulkPostType(this)">댓글</button>
+              <button class="toggle-btn" data-value="쪽지" onclick="selectBulkPostType(this)">쪽지</button>
             </div>
           </div>
-
-          <button id="refresh-btn" class="btn btn-secondary btn-refresh" onclick="loadPatients(true)">↺ 새로고침</button>
-        </div>
-
-        <!-- 오른쪽: 환자 리스트 -->
-        <div id="patient-list" class="patient-list">
-          <div class="patient-list-empty">로딩 중...</div>
-        </div>
-      </div>
-
-      <!-- 선택된 환자 정보 -->
-      <div id="patient-info" class="patient-info hidden">
-        <div class="patient-info-header">
-          <h3>환자 정보 요약</h3>
-          <button class="btn-text" onclick="clearPatient()">선택 해제</button>
-        </div>
-        <div id="patient-details" class="details-grid"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>2. 글 설정</h2>
-      <div class="settings-grid">
-        <div class="field settings-platform">
-          <label>플랫폼 <span id="platform-hint" class="label-hint">환자를 먼저 선택하세요</span></label>
-          <div id="platform-buttons" class="btn-group">
-            <span class="platform-empty-msg">← 환자 선택 시 카페 목록이 여기에 표시됩니다</span>
+          <div class="field">
+            <label>글자수 지정 (선택)</label>
+            <input type="number" id="bulk-char-limit" placeholder="예: 300" min="50" max="2000" step="50" />
+          </div>
+          <div class="field">
+            <label>병원명 표기</label>
+            <div class="btn-group">
+              <button class="toggle-btn active" id="bulk-hospital-full" data-value="full" onclick="selectBulkHospitalFormat(this)">풀네임</button>
+              <button class="toggle-btn" id="bulk-hospital-abbr" data-value="abbr" onclick="selectBulkHospitalFormat(this)">초성</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>온점 사용</label>
+            <div class="btn-group">
+              <button class="toggle-btn active" id="bulk-period-yes" data-value="yes" onclick="selectBulkPeriod(this)">사용</button>
+              <button class="toggle-btn" id="bulk-period-no" data-value="no" onclick="selectBulkPeriod(this)">미사용</button>
+            </div>
           </div>
         </div>
         <div class="field">
-          <label>글 종류</label>
-          <div id="type-buttons" class="btn-group">
-            <button class="toggle-btn" data-value="게시글" onclick="selectPostType(this)">게시글</button>
-            <button class="toggle-btn" data-value="댓글" onclick="selectPostType(this)">댓글</button>
-            <button class="toggle-btn" data-value="쪽지" onclick="selectPostType(this)">쪽지</button>
-          </div>
+          <label for="bulk-extra-context">추가 요청사항 (선택)</label>
+          <input type="text" id="bulk-extra-context" placeholder="예: 회복 기간 위주로 써줘" />
         </div>
-        <div class="field">
-          <label>가격 언급</label>
-          <div class="btn-group">
-            <button class="toggle-btn active" id="price-yes" data-value="yes" onclick="selectPrice(this)">언급 가능</button>
-            <button class="toggle-btn" id="price-no" data-value="no" onclick="selectPrice(this)">언급 금지</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>병원명 표기</label>
-          <div class="btn-group">
-            <button class="toggle-btn active" id="hospital-full" data-value="full" onclick="selectHospitalFormat(this)">풀네임</button>
-            <button class="toggle-btn" id="hospital-abbr" data-value="abbr" onclick="selectHospitalFormat(this)">초성</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>온점 사용</label>
-          <div class="btn-group">
-            <button class="toggle-btn active" id="period-yes" data-value="yes" onclick="selectPeriod(this)">사용</button>
-            <button class="toggle-btn" id="period-no" data-value="no" onclick="selectPeriod(this)">미사용</button>
-          </div>
-        </div>
+        <button class="btn btn-primary" onclick="generateBulk()" id="bulk-generate-btn">대량 생성하기</button>
       </div>
 
-      <div class="row gap-lg">
-        <div class="field">
-          <label for="extra-context">추가 요청사항 (선택)</label>
-          <input type="text" id="extra-context" placeholder="예: 회복 기간 위주로 써줘, 자연스럽게 병원 이름 한 번만 언급" />
+      <div class="card hidden" id="bulk-result-card">
+        <div class="result-header">
+          <h2>3. 생성 결과</h2>
+          <span id="bulk-progress-text" class="bulk-progress-text"></span>
         </div>
-        <div class="field" style="max-width:140px;">
-          <label for="char-limit">글자수 지정 (선택)</label>
-          <input type="number" id="char-limit" placeholder="예: 300" min="50" max="2000" step="50" />
+        <div id="bulk-progress-bar-wrap" class="bulk-progress-bar-wrap hidden">
+          <div id="bulk-progress-bar" class="bulk-progress-bar"></div>
         </div>
+        <div id="bulk-results-list" class="bulk-results-list"></div>
       </div>
 
-      <button class="btn btn-primary" onclick="generate()" id="generate-btn">
-        글 생성하기
-      </button>
-    </div>
+    </div><!-- /section-bulk -->
 
-    <div class="card" id="result-card" style="display:none;">
-      <div class="result-header">
-        <h2>3. 생성된 글 초안</h2>
-        <div class="result-actions">
-          <button class="btn btn-secondary" onclick="generate()">재생성</button>
-          <button class="btn btn-copy" onclick="copyText()">복사하기</button>
-        </div>
-      </div>
-      <div id="result-meta" class="result-meta"></div>
-      <textarea id="result-text" class="result-textarea" placeholder="글이 여기에 표시됩니다. 직접 수정도 가능합니다."></textarea>
-      <div class="result-footer">
-        <span id="char-count" class="char-count">0자</span>
-        <div id="copy-toast" class="toast hidden">클립보드에 복사됐습니다!</div>
-      </div>
-
-      <!-- 검수 결과 -->
-      <div id="review-panel" class="review-panel hidden">
-        <div class="review-header">
-          <span class="review-title">AI 검수 결과</span>
-          <span id="review-badge" class="review-badge"></span>
-        </div>
-        <div id="review-items" class="review-items"></div>
-        <div id="review-summary" class="review-summary"></div>
-      </div>
-    </div>
   </div>
 
   <script src="app.js"></script>
